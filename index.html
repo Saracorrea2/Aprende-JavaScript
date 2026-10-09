@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende JavaScript</title>
+    <meta name="description" content="Aprende JavaScript con lecciones, una consola interactiva y una evaluación práctica.">
+    <meta name="theme-color" content="#f6f5fb">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-outer: linear-gradient(135deg, #f8d5c4, #d4c4f9);
+            --bg-inner: #f8f9fc;
+            --sidebar-bg: #ffffff;
+            --primary: #7a5ec9;
+            --primary-light: #a58ee8;
+            --text-dark: #1e1e38;
+            --text-gray: #8a8a9d;
+            --card-shadow: 0 10px 30px rgba(122, 94, 201, 0.1);
+            --code-bg: #1e1e1e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: var(--bg-outer);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: var(--bg-inner);
+            border-radius: 30px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        /* Menú Lateral */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            padding-left: 15px;
+        }
+
+        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+        .nav-item {
+            padding: 12px 20px;
+            border-radius: 15px;
+            color: var(--text-gray);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover { background-color: rgba(122, 94, 201, 0.05); color: var(--primary); }
+        .nav-item.active { background-color: var(--primary); color: white; box-shadow: 0 4px 15px rgba(122, 94, 201, 0.4); }
+
+        /* Área de Contenido */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header { margin-bottom: 25px; }
+        .header h1 { color: var(--text-dark); font-size: 2rem; font-weight: 600; }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Rejillas y Tarjetas */
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+        
+        .card h3 { color: var(--text-dark); margin: 15px 0 10px 0; font-size: 1.2rem; border-bottom: 2px solid #f0ecfc; padding-bottom: 8px;}
+        .card h3:first-of-type { margin-top: 0; }
+        .card p, .card li { color: var(--text-gray); font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px; }
+        .card ul { padding-left: 18px; margin-bottom: 10px; }
+
+        /* Componentes del Resumen */
+        .stats-banner {
+            background: linear-gradient(135deg, #7a5ec9, #a58ee8);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(122, 94, 201, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .stats-banner h2 { font-size: 1.5rem; margin-bottom: 5px; }
+        .stats-banner p { opacity: 0.9; font-size: 0.95rem; }
+
+        .badge-list {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            background: #f0ecfc;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge.locked {
+            opacity: 0.4;
+            background: #e2e2ec;
+            color: #666;
+        }
+
+        .course-progress-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0ecfc;
+        }
+        .course-progress-item:last-child { border-bottom: none; }
+
+        .progress-bar-container {
+            width: 100px;
+            background: #f0ecfc;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Lecciones */
+        pre {
+            background-color: var(--code-bg);
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 15px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Consola Interactiva */
+        .console-container { display: flex; flex-direction: column; gap: 15px; }
+
+        textarea.code-editor {
+            width: 100%;
+            height: 250px;
+            background-color: #2d2d2d;
+            color: #dcdcaa;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #3e3e42;
+            font-family: monospace;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea.code-editor:focus { border-color: var(--primary); }
+
+        .terminal-output {
+            width: 100%;
+            min-height: 150px;
+            background-color: #000000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 15px;
+            font-family: monospace;
+            font-size: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 4px 15px rgba(122, 94, 201, 0.3);
+            display: inline-block;
+        }
+
+        .btn:hover { background: #6a4bbb; transform: translateY(-2px); }
+
+        /* Evaluación */
+        .quiz-question { margin-bottom: 25px; }
+        .quiz-question p { font-weight: 600; color: var(--text-dark); margin-bottom: 10px; }
+        .quiz-option { display: block; margin-bottom: 8px; color: var(--text-gray); cursor: pointer; }
+        
+        /* Círculo sin rellenar inicialmente */
+        .progress-circle {
+            --progress: 0%;
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: bold; margin: 0 auto;
+            color: var(--text-gray);
+            background: conic-gradient(var(--primary) var(--progress), #f0ecfc 0);
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .progress-circle::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .progress-circle span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 15px 0 0 0;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            margin-top: 20px;
+        }
+
+        /* Ajustes visuales y adaptacion para pantallas pequenas */
+        :root {
+            --bg-outer: linear-gradient(135deg, #f3e8ff 0%, #e8f1ff 52%, #fff1e8 100%);
+            --bg-inner: #f8f9fd;
+            --primary: #7054c7;
+            --primary-light: #a58ee8;
+            --text-dark: #25213d;
+            --text-gray: #74748a;
+            --card-shadow: 0 12px 32px rgba(49, 38, 91, 0.07);
+        }
+
+        body {
+            background-attachment: fixed;
+        }
+
+        .dashboard-container {
+            min-height: 680px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 28px 80px rgba(49, 38, 91, 0.16);
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.92);
+            padding-top: 34px;
+        }
+
+        .logo {
+            letter-spacing: -0.06em;
+            line-height: 1.2;
+        }
+
+        .nav-item {
+            border: 0;
+            background: transparent;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+
+        .nav-item:focus-visible,
+        .btn:focus-visible,
+        textarea.code-editor:focus-visible,
+        .quiz-option input:focus-visible {
+            outline: 3px solid rgba(112, 84, 199, 0.35);
+            outline-offset: 3px;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), #8d70dc);
+        }
+
+        .main-content {
+            min-width: 0;
+            padding: clamp(24px, 4vw, 44px);
+        }
+
+        .header h1 {
+            letter-spacing: -0.045em;
+        }
+
+        .card {
+            border: 1px solid #f0eef7;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stats-banner {
+            background: radial-gradient(circle at 90% 0%, rgba(255,255,255,.24), transparent 36%),
+                        linear-gradient(135deg, #6449b7, #9b7be5);
+        }
+
+        .badge-list {
+            flex-wrap: wrap;
+        }
+
+        .badge.locked {
+            opacity: 0.65;
+        }
+
+        .progress-bar-container {
+            flex-shrink: 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #8d70dc);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #5f43b0, #7b5dcc);
+        }
+
+        .terminal-output {
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .dashboard-container {
+                max-width: 760px;
+                height: auto;
+                min-height: calc(100vh - 32px);
+                flex-direction: column;
+                overflow: visible;
+                border-radius: 24px;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 22px 24px 14px;
+                border-right: 0;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            .logo {
+                margin: 0 0 18px;
+                padding-left: 0;
+                font-size: 1.5rem;
+            }
+
+            .nav-menu {
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                padding-bottom: 4px;
+                scrollbar-width: thin;
+            }
+
+            .nav-menu > li {
+                flex: 0 0 auto;
+            }
+
+            .nav-item {
+                flex: 0 0 auto;
+                padding: 10px 14px;
+                white-space: nowrap;
+            }
+
+            .main-content {
+                overflow: visible;
+            }
+
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-dashboard > div:last-child .card {
+                min-height: 300px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            body {
+                padding: 0;
+            }
+
+            .dashboard-container {
+                min-height: 100vh;
+                border: 0;
+                border-radius: 0;
+            }
+
+            .sidebar {
+                padding: 20px 16px 12px;
+            }
+
+            .main-content {
+                padding: 24px 16px;
+            }
+
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .stats-banner {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 18px;
+                padding: 22px;
+            }
+
+            .stats-banner h2 {
+                font-size: 1.25rem;
+            }
+
+            .stats-banner .btn {
+                width: 100%;
+            }
+
+            .card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .course-progress-item {
+                gap: 12px;
+            }
+
+            .course-progress-item strong {
+                font-size: 0.88rem;
+            }
+
+            .progress-bar-container {
+                width: 72px;
+            }
+
+            .badge-list {
+                gap: 8px;
+            }
+
+            .badge {
+                padding: 9px 11px;
+                font-size: 0.78rem;
+            }
+
+            textarea.code-editor {
+                height: 210px;
+                padding: 14px;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 13px 18px;
+                font-size: 1rem;
+            }
+
+            .quiz-option {
+                line-height: 1.6;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Menú Lateral -->
+        <aside class="sidebar">
+            <div class="logo">Aprende JavaScript</div>
+            <nav aria-label="Navegación principal">
+                <ul class="nav-menu">
+                    <li><button type="button" class="nav-item active" aria-current="page" onclick="switchTab(event, 'dashboard')">Resumen</button></li>
+                    <li><button type="button" class="nav-item" onclick="switchTab(event, 'teoria')">Lecciones Completas</button></li>
+                    <li><button type="button" class="nav-item" onclick="switchTab(event, 'practica')">Consola Interactiva</button></li>
+                    <li><button type="button" class="nav-item" onclick="switchTab(event, 'evaluacion')">Evaluación</button></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <div>
+                <!-- Pestaña 1: Resumen Dinámico -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="header">
+                        <h1>¡Hola de nuevo, Desarrollador! 👋</h1>
+                        <p style="color: var(--text-gray);">Aquí tienes el panorama general de tus actividades y logros en JavaScript.</p>
+                    </div>
+                    
+                    <div class="stats-banner">
+                        <div>
+                            <h2>Continúa tu camino al éxito</h2>
+                            <p>Tienes un total de <strong>7 lecciones teóricas</strong> detalladas y módulos interactivos listos.</p>
+                        </div>
+                        <button class="btn" style="background: white; color: var(--primary); padding: 10px 20px; font-size: 0.95rem;" onclick="document.querySelectorAll('.nav-item')[1].click()">Ir a Lecciones</button>
+                    </div>
+
+                    <div class="grid-dashboard">
+                        <div>
+                            <div class="card">
+                                <h3>Progreso por Módulos</h3>
+                                <div class="course-progress-item">
+                                    <div>
+                                        <strong>1. Sintaxis y Variables</strong>
+                                        <p style="margin:0; font-size:0.8rem;" id="mod1Status">Pendiente</p>
+                                    </div>
+                                    <div class="progress-bar-container"><div class="progress-bar-fill" id="bar1" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="course-progress-item">
+                                    <div>
+                                        <strong>2. Estructuras y Bucles</strong>
+                                        <p style="margin:0; font-size:0.8rem;" id="mod2Status">Pendiente</p>
+                                    </div>
+                                    <div class="progress-bar-container"><div class="progress-bar-fill" id="bar2" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="course-progress-item">
+                                    <div>
+                                        <strong>3. Funciones y Closures</strong>
+                                        <p style="margin:0; font-size:0.8rem;" id="mod3Status">Pendiente</p>
+                                    </div>
+                                    <div class="progress-bar-container"><div class="progress-bar-fill" id="bar3" style="width: 0%;"></div></div>
+                                </div>
+                            </div>
+
+                            <div class="card" style="margin-bottom: 0;">
+                                <h3>Insignias Desbloqueadas 🏆</h3>
+                                <div class="badge-list">
+                                    <div class="badge locked" id="badge1">🔒 Primeros Pasos</div>
+                                    <div class="badge locked" id="badge2">🔒 Terminal Master</div>
+                                    <div class="badge locked" id="badge3">🔒 Experto JavaScript</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="card" style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0;">
+                                <h3>Calificación Real</h3>
+                                <!-- Círculo completamente vacío por defecto -->
+                                <div class="progress-circle" id="progressCircle" style="margin: 15px auto;">
+                                    <span id="progressText">--</span>
+                                </div>
+                                <p id="progressSubtext">Sin evaluar aún. Realiza el examen para generar tu estadística.</p>
+                                <button class="btn" style="margin-top: 15px; padding: 10px; font-size: 0.9rem;" onclick="document.querySelectorAll('.nav-item')[3].click()">Tomar Examen</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña 2: Teoría Extensa -->
+                <div id="teoria" class="tab-content">
+                    <div class="header">
+                        <h1>Manual Detallado de JavaScript</h1>
+                        <p style="color: var(--text-gray);">Guía paso a paso explicada concepto por concepto.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>1. Introducción y Sintaxis Básica</h3>
+                        <p>JavaScript es el lenguaje de programación que dota de interactividad a las páginas web. Las instrucciones suelen terminar con un punto y coma (<code>;</code>). Para mostrar mensajes usamos <code>console.log()</code>.</p>
+                        <pre><code>console.log("¡Hola desde la consola de JavaScript!");</code></pre>
+
+                        <h3>2. Variables: let y const</h3>
+                        <p>Las variables son espacios en memoria para guardar datos. En JavaScript moderno usamos:</p>
+                        <ul>
+                            <li><strong><code>let</code>:</strong> Para valores que pueden cambiar o reasignarse.</li>
+                            <li><strong><code>const</code>:</strong> Para valores fijos que nunca cambian.</li>
+                        </ul>
+                        <pre><code>let puntaje = 10;
+puntaje = 15; 
+const pi = 3.1416;</code></pre>
+
+                        <h3>3. Tipos de Datos Primitivos</h3>
+                        <ul>
+                            <li><strong>String:</strong> Textos entre comillas (<code>"Sara"</code>).</li>
+                            <li><strong>Number:</strong> Numéricos enteros o decimales (<code>100</code>).</li>
+                            <li><strong>Boolean:</strong> Valores lógicos <code>true</code> o <code>false</code>.</li>
+                        </ul>
+                        <pre><code>let nombreUsuario = "Carlos";
+let edad = 22;
+let esMayorDeEdad = true;</code></pre>
+
+                        <h3>4. Operadores Aritméticos y de Comparación</h3>
+                        <p>Permiten realizar operaciones matemáticas y comparaciones estrictas (<code>===</code> compara valor y tipo de dato).</p>
+                        <pre><code>let comparacion = (5 === "5"); // false</code></pre>
+
+                        <h3>5. Estructuras de Control (if / else)</h3>
+                        <p>Permiten tomar decisiones lógicas en nuestro programa dependiendo de condiciones.</p>
+                        <pre><code>let calificacion = 85;
+if (calificacion >= 90) {
+    console.log("Sobresaliente");
+} else {
+    console.log("Aprobado");
+}</code></pre>
+
+                        <h3>6. Bucles y Ciclos (for)</h3>
+                        <p>Automatizan tareas repetitivas de forma eficiente.</p>
+                        <pre><code>for (let i = 1; i <= 3; i++) {
+    console.log("Iteración: " + i);
+}</code></pre>
+
+                        <h3>7. Funciones Avanzadas y Closures</h3>
+                        <p>Bloques de código reutilizables. Las funciones pueden retornar valores y contener lógica interna encapsulada.</p>
+                        <pre><code>const multiplicar = (a, b) => a * b;
+console.log(multiplicar(4, 5)); // 20</code></pre>
+                    </div>
+                </div>
+
+                <!-- Pestaña 3: Práctica Avanzada -->
+                <div id="practica" class="tab-content">
+                    <div class="header">
+                        <h1>Consola Interactiva Pro</h1>
+                        <p style="color: var(--text-gray);">Escribe código JavaScript real y visualiza su ejecución.</p>
+                    </div>
+
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="console-container">
+                            <p><strong>Escribe tu código aquí:</strong></p>
+                            <textarea id="codigoJS" class="code-editor" placeholder="// Escribe tu código JavaScript aquí...
+let saludo = '¡Hola Mundo!';
+console.log(saludo);"></textarea>
+                            
+                            <button class="btn" onclick="ejecutarConsola()">► Ejecutar Código</button>
+                            
+                            <p style="margin-top: 15px;"><strong>Salida (Terminal):</strong></p>
+                            <div id="consolaOutput" class="terminal-output">Esperando ejecución...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña 4: Evaluación Difícil -->
+                <div id="evaluacion" class="tab-content">
+                    <div class="header">
+                        <h1>Examen Avanzado de JavaScript</h1>
+                        <p style="color: var(--text-gray);">Demuestra tu dominio técnico respondiendo este riguroso cuestionario.</p>
+                    </div>
+
+                    <div class="card" id="quizForm" style="margin-bottom: 0;">
+                        <div class="quiz-question">
+                            <p>1. ¿Cuál es el resultado en consola de evaluar <code>typeof NaN</code> en JavaScript?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="wrong1"> "NaN"</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="number"> "number"</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="wrong2"> "undefined"</label>
+                        </div>
+
+                        <div class="quiz-question">
+                            <p>2. ¿Qué diferencia principal existe entre el operador de igualdad estricta (<code>===</code>) y la igualdad amplia (<code>==</code>)?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="estricta"> El operador <code>===</code> compara tanto el valor como el tipo de dato sin realizar conversión implícita.</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="wrong1"> No existe ninguna diferencia funcional en la ejecución moderna.</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="wrong2"> El operador <code>==</code> solo se puede usar con variables de tipo booleano.</label>
+                        </div>
+
+                        <div class="quiz-question">
+                            <p>3. Si defines un arreglo <code>let datos = [1, 2, 3];</code> y ejecutas <code>datos.push(4);</code>, ¿qué ocurre con el arreglo?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="wrong1"> Se elimina el primer elemento del arreglo.</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="wrong2"> Da un error porque los arreglos declarados con let son inmutables.</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="push"> Se añade el número 4 al final del arreglo original.</label>
+                        </div>
+
+                        <div class="quiz-question">
+                            <p>4. ¿Qué comportamiento tienen las variables declaradas con <code>let</code> en términos de ámbito (scope)?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="letScope"> Tienen ámbito de bloque (block scope), existiendo únicamente dentro del bloque de llaves <code>{}</code> donde se definieron.</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="wrong1"> Tienen ámbito global automático sin importar dónde se declaren.</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="wrong2"> Se comportan exactamente igual que las variables con var tradicional.</label>
+                        </div>
+
+                        <button class="btn" onclick="calificarExamen()" style="width: 100%; margin-top: 10px;">Enviar Respuestas</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer con créditos -->
+            <footer>
+                Sara Medina / 2026
+            </footer>
+        </main>
+    </div>
+
+    <!-- Scripts de interactividad -->
+    <script>
+        function switchTab(event, tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.removeAttribute('aria-current');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            event.currentTarget.setAttribute('aria-current', 'page');
+        }
+
+        function ejecutarConsola() {
+            const codigo = document.getElementById('codigoJS').value;
+            const output = document.getElementById('consolaOutput');
+            output.innerHTML = '';
+
+            const logOriginal = console.log;
+            try {
+                console.log = function(...args) {
+                    const line = document.createElement('div');
+                    line.textContent = `> ${args.map(String).join(' ')}`;
+                    output.appendChild(line);
+                    logOriginal.apply(console, args);
+                };
+
+                let resultado = eval(codigo);
+                if (resultado !== undefined) {
+                    const resultLine = document.createElement('div');
+                    resultLine.style.color = '#4CAF50';
+                    resultLine.textContent = `← ${String(resultado)}`;
+                    output.appendChild(resultLine);
+                }
+                if (!output.textContent) {
+                    output.textContent = '> Código ejecutado con éxito (sin salida visible).';
+                }
+            } catch (error) {
+                const errorLine = document.createElement('div');
+                errorLine.style.color = '#ff5555';
+                errorLine.textContent = `✖ Error: ${error.message}`;
+                output.appendChild(errorLine);
+            } finally {
+                console.log = logOriginal;
+            }
+        }
+
+        function calificarExamen() {
+            let correctas = 0;
+            const total = 4;
+
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q3 = document.querySelector('input[name="q3"]:checked');
+            const q4 = document.querySelector('input[name="q4"]:checked');
+
+            if (!q1 || !q2 || !q3 || !q4) {
+                alert("Por favor responde todas las preguntas del examen avanzado antes de enviar.");
+                return;
+            }
+
+            if (q1.value === 'number') correctas++;
+            if (q2.value === 'estricta') correctas++;
+            if (q3.value === 'push') correctas++;
+            if (q4.value === 'letScope') correctas++;
+
+            const porcentaje = Math.round((correctas / total) * 100);
+            const circulo = document.getElementById('progressCircle');
+            const resetearResumen = () => {
+                document.getElementById('bar1').style.width = '0%';
+                document.getElementById('bar2').style.width = '0%';
+                document.getElementById('bar3').style.width = '0%';
+                document.getElementById('mod1Status').innerText = 'Pendiente';
+                document.getElementById('mod2Status').innerText = 'Pendiente';
+                document.getElementById('mod3Status').innerText = 'Pendiente';
+
+                const badges = ['badge1', 'badge2', 'badge3'];
+                badges.forEach((id) => {
+                    const badge = document.getElementById(id);
+                    badge.classList.add('locked');
+                    badge.style.background = '#e2e2ec';
+                    badge.style.color = '#666';
+                });
+
+                document.getElementById('badge1').innerHTML = '🔒 Primeros Pasos';
+                document.getElementById('badge2').innerHTML = '🔒 Terminal Master';
+                document.getElementById('badge3').innerHTML = '🔒 Experto JavaScript';
+                circulo.style.setProperty('--progress', '0%');
+                circulo.style.color = 'var(--text-gray)';
+            };
+
+            resetearResumen();
+
+            // Actualizar la UI del círculo al enviar respuestas
+            document.getElementById('progressText').innerText = porcentaje + '%';
+            document.getElementById('progressSubtext').innerText = 'Basado en tu última evaluación avanzada.';
+            circulo.style.setProperty('--progress', porcentaje + '%');
+
+            if (porcentaje === 100) {
+                circulo.style.color = '#4CAF50';
+            } else if (porcentaje >= 50) {
+                circulo.style.color = '#ff9800';
+            } else {
+                circulo.style.color = '#f44336';
+            }
+
+            // Actualizar barras de progreso y estado de módulos en el resumen
+            if (porcentaje >= 25) {
+                document.getElementById('bar1').style.width = '100%';
+                document.getElementById('mod1Status').innerText = 'Completado';
+                let b1 = document.getElementById('badge1');
+                b1.classList.remove('locked');
+                b1.style.background = '#f0ecfc';
+                b1.style.color = 'var(--primary)';
+                b1.innerHTML = '🔥 Primeros Pasos';
+            }
+            if (porcentaje >= 75) {
+                document.getElementById('bar2').style.width = '100%';
+                document.getElementById('mod2Status').innerText = 'Completado';
+                let b2 = document.getElementById('badge2');
+                b2.classList.remove('locked');
+                b2.style.background = '#f0ecfc';
+                b2.style.color = 'var(--primary)';
+                b2.innerHTML = '💻 Terminal Master';
+            }
+            if (porcentaje === 100) {
+                document.getElementById('bar3').style.width = '100%';
+                document.getElementById('mod3Status').innerText = 'Completado';
+                let b3 = document.getElementById('badge3');
+                b3.classList.remove('locked');
+                b3.style.background = '#f0ecfc';
+                b3.style.color = 'var(--primary)';
+                b3.innerHTML = '⭐ Experto JavaScript';
+            }
+
+            alert(`¡Examen enviado! Has obtenido un ${porcentaje}% de aciertos. Se han actualizado tus insignias y tu progreso en el resumen.`);
+            document.querySelector('.nav-item').click();
+        }
+    </script>
+</body>
+</html>
